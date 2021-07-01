@@ -1,0 +1,43 @@
+<?php
+
+//Conexion a base de datos
+    include('conexion.php');
+    $user="root";
+    $server="localhost";
+    $db="HistoricoESP32";
+    $pass=conexion();
+
+$con=mysqli_connect($server,$user,$pass,$db);
+
+if($_POST['usuario'] == "" or $_POST["name_pastilla"] == ""){
+    $response["error"]=true;
+    $response["mensaje"]="Por favor introduzca todos los datos";
+}else{
+    $usuario=$_POST['usuario'];
+    $sql = "select * from usuarios where usuario = '$usuario'";
+    $mysql = mysqli_query($con, $sql);
+    $comprobar_user = 0;
+    while($result = mysqli_fetch_array($mysql)) {     //Recorremos la tabla en  busca del usuario
+        if($result['usuario'] == $_POST['usuario']) { //Si lo encuentra es que existe
+            $comprobar_user = 1;
+        }
+    }
+
+    if($comprobar_user==1){
+        $name_pastilla = $_POST["name_pastilla"];
+        $sql = "select * from pastillas where name_pastilla = '$name_pastilla'";
+        $mysql = mysqli_query($con, $sql);
+        $response["error"]=false;
+        while($result = mysqli_fetch_array($mysql)) {
+             $response["mensaje"] = $result["desayuno"]."-".$result["almuerzo"]."-".$result["merienda"]."-".$result["cena"];
+        }
+
+
+    }else{
+        $response["error"]=true;
+        $response["mensaje"]="El usuario no existe";
+    }
+}
+
+mysqli_close($con);
+echo json_encode($response);
